@@ -17,7 +17,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
 
   late double _opacity = 0.5;
 
-  void onTick(Timer timer) {
+  void _onTick(Timer timer) {
     setState(() {
       if (_totalSeconds == 0) {
         timer.cancel();
@@ -30,7 +30,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     });
   }
 
-  void onResetButtonClicked() {
+  void _onReset() {
     if (_isPlaying) {
       _timer.cancel();
     }
@@ -41,11 +41,11 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     });
   }
 
-  void onPlayButtonClicked() {
+  void _onPlay() {
     if (!_isPlaying) {
       _timer = Timer.periodic(
         const Duration(seconds: 1),
-        onTick,
+        _onTick,
       );
     } else {
       _timer.cancel();
@@ -57,7 +57,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
     });
   }
 
-  void onSkipButtonClicked() {
+  void _onSkip() {
     if (_totalSeconds >= 60 * 15) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -125,7 +125,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                 height: 16,
               ),
               GestureDetector(
-                onTap: onPlayButtonClicked,
+                onTap: _onPlay,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeInOut,
@@ -166,7 +166,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                 children: [
                   IconButton(
                     iconSize: 40,
-                    onPressed: onResetButtonClicked,
+                    onPressed: _onReset,
                     icon: const Icon(
                       Icons.restore,
                       color: Colors.black,
@@ -174,7 +174,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                   ),
                   IconButton(
                     iconSize: 80,
-                    onPressed: onPlayButtonClicked,
+                    onPressed: _onPlay,
                     icon: Icon(
                       _isPlaying
                           ? Icons.pause_circle_outline_rounded
@@ -184,7 +184,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                   ),
                   IconButton(
                     iconSize: 40,
-                    onPressed: onSkipButtonClicked,
+                    onPressed: _onSkip,
                     icon: const Icon(
                       Icons.skip_next_rounded,
                       color: Colors.black,

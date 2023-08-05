@@ -13,7 +13,7 @@ class NotificationScreen extends StatelessWidget {
       ),
       body: const Padding(
         padding: EdgeInsets.all(16),
-        child: Text("D"),
+        child: Text("Hi"),
       ),
     );
   }

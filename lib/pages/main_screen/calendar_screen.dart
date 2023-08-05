@@ -1,8 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:timeplifey/widget/calendar_form.dart';
 
+import '../../models/calendar.dart';
+import '../../widget/calendar_form.dart';
 import '../../functions/calendar.dart';
+
+String getAll = """
+query GetAll {
+  getAll {
+    date
+    calendars {
+      title
+    }
+  }
+}
+""";
+
+String getDate = """
+query getDate(\$date: String!) {
+  getDate(date: \$date) {
+    calendars {
+      id
+      title
+      start
+      end
+      description
+    }
+  }
+}
+""";
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -12,27 +38,13 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  late final ValueNotifier<List<Event>> _selectedEvents;
+  late ValueNotifier<List<Calendar>> _selectedCalendars;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
-  @override
-  void initState() {
-    super.initState();
-
-    _selectedDay = _focusedDay;
-    _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
-  }
-
-  @override
-  void dispose() {
-    _selectedEvents.dispose();
-    super.dispose();
-  }
-
-  List<Event> _getEventsForDay(DateTime day) {
-    return kEvents[day] ?? [];
+  List<Calendar> _getCalendarsForDay(DateTime day) {
+    return kCalendars[day] ?? [];
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
@@ -42,13 +54,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _focusedDay = focusedDay;
       });
 
-      _selectedEvents.value = _getEventsForDay(selectedDay);
+      _selectedCalendars.value = _getCalendarsForDay(selectedDay);
     }
   }
 
-  void _openTransactionModal() {
+  void _openTransactionModal(BuildContext ctx) {
     showModalBottomSheet(
-      context: context,
+      context: ctx,
       builder: (_) {
         return GestureDetector(
           onTap: () {},
@@ -63,6 +75,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
       },
     );
   }
+
+  void _showDescription(BuildContext ctx, String description) {
+    showDialog(
+      context: ctx,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          insetPadding: const EdgeInsets.all(24),
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+          title: Text(
+            "Description",
+            style: Theme.of(ctx).textTheme.bodyLarge,
+          ),
+          content: Text(description),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _selectedDay = _focusedDay;
+    _selectedCalendars = ValueNotifier(_getCalendarsForDay(_selectedDay!));
+  }
+
+  @override
+  void dispose() {
+    _selectedCalendars.dispose();
+    super.dispose();
+  }
+
+  final _today = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -79,20 +133,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 ElevatedButton(
-                  onPressed: _openTransactionModal,
+                  onPressed: () => _openTransactionModal(context),
                   child: const Text(
                     "Add Calendar",
                   ),
                 ),
               ],
             ),
-            TableCalendar<Event>(
-              firstDay: kFirstDay,
-              lastDay: kLastDay,
+            TableCalendar<Calendar>(
+              firstDay: DateTime(_today.year, _today.month - 3, _today.day),
+              lastDay: DateTime(_today.year, _today.month + 3, _today.day),
               focusedDay: _focusedDay,
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
               calendarFormat: _calendarFormat,
-              eventLoader: _getEventsForDay,
+              eventLoader: _getCalendarsForDay,
               startingDayOfWeek: StartingDayOfWeek.monday,
               calendarStyle: const CalendarStyle(
                 markerSize: 6,
@@ -113,28 +167,41 @@ class _CalendarScreenState extends State<CalendarScreen> {
               height: 16,
             ),
             Expanded(
-              child: ValueListenableBuilder<List<Event>>(
-                valueListenable: _selectedEvents,
+              child: ValueListenableBuilder<List<Calendar>>(
+                valueListenable: _selectedCalendars,
                 builder: (context, value, _) {
                   return value.isEmpty
                       ? const Center(child: Text("- No Calendars -"))
                       : ListView.builder(
                           itemCount: value.length,
                           itemBuilder: (context, index) {
+                            final item = value[index];
                             return ListTile(
-                              onTap: () => print('${value[index]}'),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              onTap: () =>
+                                  _showDescription(context, item.description),
                               title: Text(
-                                '${value[index]}',
+                                item.title,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              trailing: const Text(
-                                "12:55 ~ dd",
-                                style: TextStyle(
+                              trailing: Text(
+                                "${item.startTime} ~ ${item.endTime}",
+                                style: const TextStyle(
                                   fontSize: 12,
                                 ),
+                              ),
+                              subtitle: Text(
+                                item.description,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             );
                           },

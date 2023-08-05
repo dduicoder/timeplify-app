@@ -44,7 +44,7 @@ class _TabsScreenState extends State<TabsScreen> {
     },
   ];
 
-  int index = 0;
+  int _index = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +68,7 @@ class _TabsScreenState extends State<TabsScreen> {
             )
             .toList(),
       ),
-      body: _mainPages[index]["page"] as Widget,
+      body: _mainPages[_index]["page"] as Widget,
       bottomNavigationBar: Theme(
         data: ThemeData(
           splashColor: Colors.transparent,
@@ -78,7 +78,7 @@ class _TabsScreenState extends State<TabsScreen> {
               .map(
                 (e) => BottomNavigationBarItem(
                   icon: Icon(
-                    (index == _mainPages.indexOf(e)
+                    (_index == _mainPages.indexOf(e)
                         ? e["selctedIcon"]
                         : e["initialIcon"]) as IconData,
                   ),
@@ -89,11 +89,11 @@ class _TabsScreenState extends State<TabsScreen> {
           elevation: 10,
 
           // backgroundColor: const Color.fromRGBO(255, 255, 255, 0.75),
-          currentIndex: index,
+          currentIndex: _index,
           selectedItemColor: Colors.black,
           onTap: (int newIndex) {
             setState(
-              () => index = newIndex,
+              () => _index = newIndex,
             );
           },
         ),
