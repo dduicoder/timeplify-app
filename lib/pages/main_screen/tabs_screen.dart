@@ -50,13 +50,7 @@ class _TabsScreenState extends State<TabsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Timeplifey",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text("Timeplifey"),
         actions: _appBarPages
             .map(
               (e) => IconButton(
@@ -69,33 +63,43 @@ class _TabsScreenState extends State<TabsScreen> {
             .toList(),
       ),
       body: _mainPages[_index]["page"] as Widget,
+      extendBody: true,
       bottomNavigationBar: Theme(
         data: ThemeData(
           splashColor: Colors.transparent,
         ),
-        child: BottomNavigationBar(
-          items: _mainPages
-              .map(
-                (e) => BottomNavigationBarItem(
-                  icon: Icon(
-                    (_index == _mainPages.indexOf(e)
-                        ? e["selctedIcon"]
-                        : e["initialIcon"]) as IconData,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: Colors.black.withOpacity(0.025),
+                width: 1,
+              ),
+            ),
+          ),
+          child: BottomNavigationBar(
+            items: _mainPages
+                .map(
+                  (e) => BottomNavigationBarItem(
+                    icon: Icon(
+                      (_index == _mainPages.indexOf(e)
+                          ? e["selctedIcon"]
+                          : e["initialIcon"]) as IconData,
+                    ),
+                    label: e["title"] as String,
                   ),
-                  label: e["title"] as String,
-                ),
-              )
-              .toList(),
-          elevation: 10,
-
-          // backgroundColor: const Color.fromRGBO(255, 255, 255, 0.75),
-          currentIndex: _index,
-          selectedItemColor: Colors.black,
-          onTap: (int newIndex) {
-            setState(
-              () => _index = newIndex,
-            );
-          },
+                )
+                .toList(),
+            elevation: 0,
+            backgroundColor: const Color.fromRGBO(255, 255, 255, 0.75),
+            currentIndex: _index,
+            selectedItemColor: Colors.black,
+            onTap: (int newIndex) {
+              setState(
+                () => _index = newIndex,
+              );
+            },
+          ),
         ),
       ),
     );

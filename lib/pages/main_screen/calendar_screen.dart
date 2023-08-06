@@ -1,34 +1,14 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:timeplifey/graphql/querys.dart';
+import 'package:timeplifey/widget/calendar_list.dart';
 
 import '../../models/calendar.dart';
 import '../../widget/calendar_form.dart';
-import '../../functions/calendar.dart';
-
-String getAll = """
-query GetAll {
-  getAll {
-    date
-    calendars {
-      title
-    }
-  }
-}
-""";
-
-String getDate = """
-query getDate(\$date: String!) {
-  getDate(date: \$date) {
-    calendars {
-      id
-      title
-      start
-      end
-      description
-    }
-  }
-}
-""";
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -38,14 +18,9 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  late ValueNotifier<List<Calendar>> _selectedCalendars;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-
-  List<Calendar> _getCalendarsForDay(DateTime day) {
-    return kCalendars[day] ?? [];
-  }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
@@ -53,8 +28,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
       });
-
-      _selectedCalendars.value = _getCalendarsForDay(selectedDay);
     }
   }
 
@@ -68,35 +41,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
           child: CalendarForm(
             currentDate: _focusedDay,
             onSubmit: (calendar) {
-              print((calendar).id);
+              GraphQLProvider.of(ctx).value.mutate(
+                    MutationOptions(
+                      document: gql(querys["addCalendar"]),
+                      variables: {
+                        "date": DateFormat("yyyy-MM-dd").format(_focusedDay),
+                        "calendarId": calendar.id,
+                        "title": calendar.title,
+                        "start": calendar.start,
+                        "end": calendar.end,
+                        "description": calendar.description,
+                      },
+                    ),
+                  );
             },
           ),
-        );
-      },
-    );
-  }
-
-  void _showDescription(BuildContext ctx, String description) {
-    showDialog(
-      context: ctx,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          insetPadding: const EdgeInsets.all(24),
-          surfaceTintColor: Colors.white,
-          backgroundColor: Colors.white,
-          title: Text(
-            "Description",
-            style: Theme.of(ctx).textTheme.bodyLarge,
-          ),
-          content: Text(description),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
         );
       },
     );
@@ -107,13 +66,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     super.initState();
 
     _selectedDay = _focusedDay;
-    _selectedCalendars = ValueNotifier(_getCalendarsForDay(_selectedDay!));
-  }
-
-  @override
-  void dispose() {
-    _selectedCalendars.dispose();
-    super.dispose();
   }
 
   final _today = DateTime.now();
@@ -140,74 +92,112 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               ],
             ),
-            TableCalendar<Calendar>(
-              firstDay: DateTime(_today.year, _today.month - 3, _today.day),
-              lastDay: DateTime(_today.year, _today.month + 3, _today.day),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              calendarFormat: _calendarFormat,
-              eventLoader: _getCalendarsForDay,
-              startingDayOfWeek: StartingDayOfWeek.monday,
-              calendarStyle: const CalendarStyle(
-                markerSize: 6,
+            Query(
+              options: QueryOptions(
+                document: gql(querys["getAll"]),
               ),
-              onDaySelected: _onDaySelected,
-              onFormatChanged: (format) {
-                if (_calendarFormat != format) {
-                  setState(() {
-                    _calendarFormat = format;
-                  });
+              builder: (result, {refetch, fetchMore}) {
+                if (result.hasException) {
+                  return Text(result.exception.toString());
                 }
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
+                if (result.isLoading) {
+                  return SizedBox(
+                    height: 200,
+                    child: Center(
+                      child: SizedBox(
+                        height: 50,
+                        width: 50,
+                        child: CircularProgressIndicator(
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                final events = LinkedHashMap<DateTime, List<String>>(
+                  equals: isSameDay,
+                  hashCode: (DateTime key) {
+                    return key.day * 1000000 + key.month * 10000 + key.year;
+                  },
+                )..addAll({
+                    for (var element in result.data!["getAll"]
+                        .where((e) => e["calendars"].length != 0))
+                      DateTime.parse(element["date"]):
+                          (element["calendars"] as List)
+                              .map(
+                                (item) => item["title"].toString(),
+                              )
+                              .toList()
+                  });
+
+                return TableCalendar<String>(
+                  firstDay: DateTime(_today.year, _today.month - 3, _today.day),
+                  lastDay: DateTime(_today.year, _today.month + 3, _today.day),
+                  focusedDay: _focusedDay,
+                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                  calendarFormat: _calendarFormat,
+                  eventLoader: (DateTime day) {
+                    return events[day] ?? [];
+                  },
+                  startingDayOfWeek: StartingDayOfWeek.monday,
+                  calendarStyle: const CalendarStyle(
+                    markerSize: 6,
+                  ),
+                  onDaySelected: _onDaySelected,
+                  onFormatChanged: (format) {
+                    if (_calendarFormat != format) {
+                      setState(() {
+                        _calendarFormat = format;
+                      });
+                    }
+                  },
+                  onPageChanged: (focusedDay) => _focusedDay = focusedDay,
+                );
               },
             ),
             const SizedBox(
               height: 16,
             ),
-            Expanded(
-              child: ValueListenableBuilder<List<Calendar>>(
-                valueListenable: _selectedCalendars,
-                builder: (context, value, _) {
-                  return value.isEmpty
-                      ? const Center(child: Text("- No Calendars -"))
-                      : ListView.builder(
-                          itemCount: value.length,
-                          itemBuilder: (context, index) {
-                            final item = value[index];
-                            return ListTile(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              onTap: () =>
-                                  _showDescription(context, item.description),
-                              title: Text(
-                                item.title,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              trailing: Text(
-                                "${item.startTime} ~ ${item.endTime}",
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                ),
-                              ),
-                              subtitle: Text(
-                                item.description,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          },
-                        );
+            Query(
+              options: QueryOptions(
+                document: gql(querys["getDate"]),
+                variables: {
+                  "date": DateFormat('yyyy-MM-dd').format(_focusedDay)
                 },
               ),
+              builder: (result, {refetch, fetchMore}) {
+                if (result.isLoading) {
+                  return const Expanded(
+                    child: Center(child: Text("Loading...")),
+                  );
+                }
+                if (result.hasException) {
+                  return Text(result.exception.toString());
+                }
+
+                final List<dynamic> queryRes =
+                    result.data!["getDate"]["calendars"];
+                final List<Calendar> calendars = queryRes.map(
+                  (e) {
+                    Map<dynamic, dynamic> item = Map.from(e);
+                    return Calendar(
+                      id: item["id"],
+                      title: item["title"],
+                      start: item["start"],
+                      end: item["end"],
+                      description: item["description"],
+                    );
+                  },
+                ).toList();
+                return Expanded(
+                  child: calendars.isEmpty
+                      ? const Center(child: Text("- No Calendars -"))
+                      : CalendarList(
+                          calendars: calendars,
+                        ),
+                );
+              },
             ),
           ],
         ),

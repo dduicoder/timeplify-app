@@ -35,8 +35,8 @@ class CalendarForm extends StatefulWidget {
 class _CalendarFormState extends State<CalendarForm> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  late String _startTime = "Start time";
-  late String _endTime = "End time";
+  late String _start = "Start";
+  late String _end = "End";
 
   void _openTimePicker(String initialTime, Function(String) setValue) async {
     TimeOfDay? selectedTime = await showTimePicker(
@@ -60,16 +60,16 @@ class _CalendarFormState extends State<CalendarForm> {
     final description = _descriptionController.text;
 
     if (title.isNotEmpty &&
-        _startTime != "Start time" &&
-        _endTime != "End time" &&
-        isTime1BeforeTime2(_startTime, _endTime) &&
+        _start != "Start" &&
+        _end != "End" &&
+        isTime1BeforeTime2(_start, _end) &&
         description.isNotEmpty) {
       widget.onSubmit(
         Calendar(
           id: const Uuid().v4(),
           title: title,
-          startTime: _startTime,
-          endTime: _endTime,
+          start: _start,
+          end: _end,
           description: description,
         ),
       );
@@ -138,26 +138,26 @@ class _CalendarFormState extends State<CalendarForm> {
               children: [
                 TextButton(
                   onPressed: () => _openTimePicker(
-                    _startTime == "Start time"
+                    _start == "Start"
                         ? DateFormat('HH:mm').format(DateTime.now())
-                        : _startTime,
+                        : _start,
                     (value) => setState(
-                      () => _startTime = value,
+                      () => _start = value,
                     ),
                   ),
-                  child: Text(_startTime),
+                  child: Text(_start),
                 ),
                 const Text("~"),
                 TextButton(
                   onPressed: () => _openTimePicker(
-                    _endTime == "End time"
+                    _end == "End"
                         ? DateFormat('HH:mm').format(DateTime.now())
-                        : _endTime,
+                        : _end,
                     (value) => setState(
-                      () => _endTime = value,
+                      () => _end = value,
                     ),
                   ),
-                  child: Text(_endTime),
+                  child: Text(_end),
                 ),
               ],
             ),

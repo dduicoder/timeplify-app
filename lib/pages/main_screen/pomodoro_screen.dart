@@ -107,8 +107,8 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
+    return SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
@@ -129,8 +129,8 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeInOut,
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  height: MediaQuery.of(context).size.width * 0.9,
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.width * 0.8,
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Color.fromRGBO(255, 255, 255, _opacity),

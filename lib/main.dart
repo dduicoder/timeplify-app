@@ -28,15 +28,17 @@ class MyApp extends StatelessWidget {
           fontFamily: "Sanfrancisco",
           brightness: Brightness.light,
           useMaterial3: true,
+          textButtonTheme: TextButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.all(16),
+            ),
+          ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
               elevation: 0,
               foregroundColor: Colors.white,
               backgroundColor: const Color.fromARGB(255, 100, 115, 230),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.all(16),
             ),
           ),
           textTheme: const TextTheme(
@@ -52,6 +54,7 @@ class MyApp extends StatelessWidget {
           ),
           appBarTheme: const AppBarTheme(
             titleTextStyle: TextStyle(
+              color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 20,
               letterSpacing: 0.25,
