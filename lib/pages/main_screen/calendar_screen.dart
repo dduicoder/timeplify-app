@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:timeplifey/graphql/querys.dart';
+import 'package:timeplifey/graphql/queries.dart';
 import 'package:timeplifey/widget/calendar_list.dart';
 
 import '../../models/calendar.dart';
@@ -21,8 +21,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  late void Function() refetchAll;
+  late void Function() refetchDate;
 
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+  void _selectDay(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
         _selectedDay = selectedDay;
@@ -31,7 +33,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  void _openTransactionModal(BuildContext ctx) {
+  void _openCalendarModal(BuildContext ctx) {
     showModalBottomSheet(
       context: ctx,
       builder: (_) {
@@ -41,24 +43,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
           child: CalendarForm(
             currentDate: _focusedDay,
             onSubmit: (calendar) {
-              GraphQLProvider.of(ctx).value.mutate(
-                    MutationOptions(
-                      document: gql(querys["addCalendar"]),
-                      variables: {
-                        "date": DateFormat("yyyy-MM-dd").format(_focusedDay),
-                        "calendarId": calendar.id,
-                        "title": calendar.title,
-                        "start": calendar.start,
-                        "end": calendar.end,
-                        "description": calendar.description,
-                      },
-                    ),
-                  );
+              _addCalendar(ctx, calendar);
             },
           ),
         );
       },
     );
+  }
+
+  void _addCalendar(BuildContext ctx, Calendar calendar) {
+    GraphQLProvider.of(ctx).value.mutate(
+          MutationOptions(
+            document: gql(Queries.addCalendar),
+            variables: {
+              "date": DateFormat("yyyy-MM-dd").format(_focusedDay),
+              "calendarId": calendar.id,
+              "title": calendar.title,
+              "start": calendar.start,
+              "end": calendar.end,
+              "description": calendar.description,
+            },
+            onCompleted: (result) {
+              refetchAll();
+              refetchDate();
+            },
+          ),
+        );
+  }
+
+  void _removeCalendar(BuildContext ctx, String id) {
+    GraphQLProvider.of(ctx).value.mutate(
+          MutationOptions(
+            document: gql(Queries.removeCalendar),
+            variables: {
+              "date": DateFormat("yyyy-MM-dd").format(_focusedDay),
+              "calendarId": id,
+            },
+            onCompleted: (result) {
+              refetchAll();
+              refetchDate();
+            },
+          ),
+        );
   }
 
   @override
@@ -85,7 +111,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 ElevatedButton(
-                  onPressed: () => _openTransactionModal(context),
+                  onPressed: () => _openCalendarModal(context),
                   child: const Text(
                     "Add Calendar",
                   ),
@@ -94,12 +120,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             Query(
               options: QueryOptions(
-                document: gql(querys["getAll"]),
+                document: gql(Queries.getAll),
               ),
               builder: (result, {refetch, fetchMore}) {
-                if (result.hasException) {
-                  return Text(result.exception.toString());
-                }
                 if (result.isLoading) {
                   return SizedBox(
                     height: 200,
@@ -114,6 +137,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                   );
                 }
+                if (result.hasException) {
+                  return Text(result.exception.toString());
+                }
+
+                refetchAll = refetch!;
 
                 final events = LinkedHashMap<DateTime, List<String>>(
                   equals: isSameDay,
@@ -137,14 +165,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   focusedDay: _focusedDay,
                   selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                   calendarFormat: _calendarFormat,
-                  eventLoader: (DateTime day) {
-                    return events[day] ?? [];
-                  },
+                  eventLoader: (DateTime day) => events[day] ?? [],
                   startingDayOfWeek: StartingDayOfWeek.monday,
                   calendarStyle: const CalendarStyle(
                     markerSize: 6,
+                    selectedDecoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color.fromARGB(255, 100, 115, 230),
+                    ),
+                    todayDecoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color.fromRGBO(130, 130, 210, 0.75),
+                    ),
                   ),
-                  onDaySelected: _onDaySelected,
+                  onDaySelected: _selectDay,
                   onFormatChanged: (format) {
                     if (_calendarFormat != format) {
                       setState(() {
@@ -161,7 +195,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             Query(
               options: QueryOptions(
-                document: gql(querys["getDate"]),
+                document: gql(Queries.getDate),
                 variables: {
                   "date": DateFormat('yyyy-MM-dd').format(_focusedDay)
                 },
@@ -175,6 +209,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 if (result.hasException) {
                   return Text(result.exception.toString());
                 }
+
+                refetchDate = refetch!;
 
                 final List<dynamic> queryRes =
                     result.data!["getDate"]["calendars"];
@@ -190,11 +226,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     );
                   },
                 ).toList();
+
                 return Expanded(
                   child: calendars.isEmpty
                       ? const Center(child: Text("- No Calendars -"))
                       : CalendarList(
                           calendars: calendars,
+                          onRemoveCalendar: _removeCalendar,
                         ),
                 );
               },

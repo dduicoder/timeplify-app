@@ -3,10 +3,12 @@ import 'package:timeplifey/models/calendar.dart';
 
 class CalendarList extends StatelessWidget {
   final List<Calendar> calendars;
+  final Function(BuildContext, String) onRemoveCalendar;
 
   const CalendarList({
     super.key,
     required this.calendars,
+    required this.onRemoveCalendar,
   });
 
   void _showDescription(
@@ -49,35 +51,56 @@ class CalendarList extends StatelessWidget {
       itemCount: calendars.length,
       itemBuilder: (context, index) {
         final item = calendars[index];
-        return ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          onTap: () => _showDescription(
-            context,
-            item.title,
-            item.description,
-          ),
-          title: Text(
-            item.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+        return Dismissible(
+          onDismissed: (_) {
+            onRemoveCalendar(context, item.id);
+          },
+          direction: DismissDirection.endToStart,
+          key: ValueKey(item.id),
+          background: Container(
+            alignment: AlignmentDirectional.centerEnd,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: Colors.red,
+            ),
+            child: const Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(
+                Icons.delete_rounded,
+                color: Colors.white,
+              ),
             ),
           ),
-          trailing: Text(
-            "${item.start} ~ ${item.end}",
-            style: const TextStyle(
-              fontSize: 12,
+          child: ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-          ),
-          subtitle: Text(
-            item.description,
-            style: const TextStyle(
-              fontSize: 12,
+            onTap: () => _showDescription(
+              context,
+              item.title,
+              item.description,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            title: Text(
+              item.title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            trailing: Text(
+              "${item.start} ~ ${item.end}",
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
+            subtitle: Text(
+              item.description,
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         );
       },
