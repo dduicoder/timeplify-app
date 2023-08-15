@@ -1,6 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:timeplifey/models/calendar.dart';
 
+List<String> timeDifferenceInHours(String startTime, String endTime) {
+  List<int> startComponents = startTime.split(':').map(int.parse).toList();
+  List<int> endComponents = endTime.split(':').map(int.parse).toList();
+
+  int startMinutes = startComponents[0] * 60 + startComponents[1];
+  int endMinutes = endComponents[0] * 60 + endComponents[1];
+
+  int differenceInMinutes = endMinutes - startMinutes;
+
+  int hourDifference = differenceInMinutes ~/ 60;
+  int minuteDifference = differenceInMinutes % 60;
+
+  return [
+    hourDifference == 0 ? "" : "${hourDifference}h",
+    minuteDifference == 0 ? "" : " ${minuteDifference}m",
+  ];
+}
+
 class CalendarList extends StatelessWidget {
   final List<Calendar> calendars;
   final Function(BuildContext, String) onRemoveCalendar;
@@ -13,21 +31,22 @@ class CalendarList extends StatelessWidget {
 
   void _showDescription(
     BuildContext ctx,
-    String title,
-    String description,
+    Calendar calendar,
   ) {
     showDialog(
       context: ctx,
       builder: (BuildContext context) {
+        final List<String> timeD =
+            timeDifferenceInHours(calendar.start, calendar.end);
         return AlertDialog(
           insetPadding: const EdgeInsets.all(24),
           surfaceTintColor: Colors.white,
           backgroundColor: Colors.white,
           title: Text(
-            title,
+            "${calendar.title} (${timeD[0]}${timeD[1]})",
             style: Theme.of(ctx).textTheme.bodyLarge,
           ),
-          content: Text(description),
+          content: Text(calendar.description),
           actions: [
             TextButton(
               onPressed: () {
@@ -77,8 +96,7 @@ class CalendarList extends StatelessWidget {
             ),
             onTap: () => _showDescription(
               context,
-              item.title,
-              item.description,
+              item,
             ),
             title: Text(
               item.title,

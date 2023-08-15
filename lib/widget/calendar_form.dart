@@ -171,15 +171,23 @@ class _CalendarFormState extends State<CalendarForm> {
               controller: _descriptionController,
             ),
             const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text(
-                  "Add Calendar",
-                  style: TextStyle(color: Colors.white),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Cancel"),
                 ),
-              ),
+                const SizedBox(
+                  width: 8,
+                ),
+                ElevatedButton(
+                  onPressed: _submitForm,
+                  child: const Text("Add Calendar"),
+                ),
+              ],
             ),
           ],
         ),
