@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timeplifey/pages/main_screen/note_screen.dart';
 
 import '../../pages/account_screen.dart';
 import '../../pages/main_screen/calendar_screen.dart';
@@ -41,6 +42,12 @@ class _TabsScreenState extends State<TabsScreen> {
       "title": "Pomodoro",
       "selctedIcon": Icons.watch_later_rounded,
       "initialIcon": Icons.watch_later_outlined,
+    },
+    {
+      "page": NoteScreen(),
+      "title": "Note",
+      "selctedIcon": Icons.note_alt_rounded,
+      "initialIcon": Icons.note_alt_outlined,
     },
   ];
 

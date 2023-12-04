@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     return GraphQLProvider(
       client: ValueNotifier(
         GraphQLClient(
-          link: HttpLink("http://localhost:4000/"),
+          link: HttpLink("http://localhost:4000"),
           cache: GraphQLCache(),
         ),
       ),
@@ -64,6 +64,7 @@ class MyApp extends StatelessWidget {
           ),
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 100, 115, 230),
+            background: Colors.white,
           ),
         ),
         routes: {

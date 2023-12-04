@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 class PomodoroScreen extends StatefulWidget {
+  static const routeName = "/pomodoro";
   const PomodoroScreen({super.key});
 
   @override
@@ -129,8 +130,8 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeInOut,
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  height: MediaQuery.of(context).size.width * 0.8,
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  height: MediaQuery.of(context).size.width * 0.75,
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Color.fromRGBO(255, 255, 255, _opacity),

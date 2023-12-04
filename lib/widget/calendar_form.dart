@@ -128,7 +128,7 @@ class _CalendarFormState extends State<CalendarForm> {
               onSubmitted: (_) => _submitForm(),
               controller: _titleController,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 32),
             const Align(
               alignment: Alignment.centerLeft,
               child: Text("Time"),
@@ -170,7 +170,7 @@ class _CalendarFormState extends State<CalendarForm> {
               onSubmitted: (_) => _submitForm(),
               controller: _descriptionController,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
