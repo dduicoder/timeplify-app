@@ -24,18 +24,12 @@ class Queries {
   """;
   static String addCalendar = """
   mutation AddCalendar(\$date: String!, \$calendarId: ID!, \$title: String!, \$start: String!, \$end: String!, \$description: String!) {
-    addCalendar(date: \$date, id: \$calendarId, title: \$title, start: \$start, end: \$end, description: \$description) {
-      id
-      title
-      start
-      end
-      description
-    }
+    addCalendar(date: \$date, id: \$calendarId, title: \$title, start: \$start, end: \$end, description: \$description)
   }
   """;
   static String removeCalendar = """
   mutation RemoveCalendar(\$date: String!, \$calendarId: ID!) {
-  removeCalendar(date: \$date, id: \$calendarId)
-}
+    removeCalendar(date: \$date, id: \$calendarId)
+  }
   """;
 }

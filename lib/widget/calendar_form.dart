@@ -163,6 +163,8 @@ class _CalendarFormState extends State<CalendarForm> {
             ),
             TextField(
               style: Theme.of(context).textTheme.bodyMedium,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
               decoration: InputDecoration(
                 labelText: "Description",
                 labelStyle: Theme.of(context).textTheme.bodyMedium,
