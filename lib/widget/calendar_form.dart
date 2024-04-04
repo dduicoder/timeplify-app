@@ -37,6 +37,7 @@ class _CalendarFormState extends State<CalendarForm> {
   final TextEditingController _descriptionController = TextEditingController();
   late String _start = "Start";
   late String _end = "End";
+  late bool _isDate = true;
 
   void _openTimePicker(String initialTime, Function(String) setValue) async {
     TimeOfDay? selectedTime = await showTimePicker(
@@ -59,7 +60,8 @@ class _CalendarFormState extends State<CalendarForm> {
     final title = _titleController.text;
     final description = _descriptionController.text;
 
-    if (title.isNotEmpty &&
+    if (_isDate &&
+        title.isNotEmpty &&
         _start != "Start" &&
         _end != "End" &&
         isTime1BeforeTime2(_start, _end) &&
@@ -70,6 +72,18 @@ class _CalendarFormState extends State<CalendarForm> {
           title: title,
           start: _start,
           end: _end,
+          description: description,
+        ),
+      );
+
+      Navigator.of(context).pop();
+    } else if (!_isDate && title.isNotEmpty && description.isNotEmpty) {
+      widget.onSubmit(
+        Calendar(
+          id: const Uuid().v4(),
+          title: title,
+          start: "",
+          end: "",
           description: description,
         ),
       );
@@ -129,38 +143,52 @@ class _CalendarFormState extends State<CalendarForm> {
               controller: _titleController,
             ),
             const SizedBox(height: 32),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text("Time"),
-            ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
-                  onPressed: () => _openTimePicker(
-                    _start == "Start"
-                        ? DateFormat('HH:mm').format(DateTime.now())
-                        : _start,
-                    (value) => setState(
-                      () => _start = value,
-                    ),
-                  ),
-                  child: Text(_start),
-                ),
-                const Text("~"),
-                TextButton(
-                  onPressed: () => _openTimePicker(
-                    _end == "End"
-                        ? DateFormat('HH:mm').format(DateTime.now())
-                        : _end,
-                    (value) => setState(
-                      () => _end = value,
-                    ),
-                  ),
-                  child: Text(_end),
-                ),
+                const Text("Time"),
+                Checkbox(
+                  value: _isDate,
+                  onChanged: (newVal) {
+                    setState(() {
+                      _isDate = newVal!;
+                    });
+                  },
+                )
               ],
             ),
+            _isDate
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: () => _openTimePicker(
+                          _start == "Start"
+                              ? DateFormat('HH:mm').format(DateTime.now())
+                              : _start,
+                          (value) => setState(
+                            () => _start = value,
+                          ),
+                        ),
+                        child: Text(_start),
+                      ),
+                      const Text("~"),
+                      TextButton(
+                        onPressed: () => _openTimePicker(
+                          _end == "End"
+                              ? DateFormat('HH:mm').format(DateTime.now())
+                              : _end,
+                          (value) => setState(
+                            () => _end = value,
+                          ),
+                        ),
+                        child: Text(_end),
+                      ),
+                    ],
+                  )
+                : const SizedBox(
+                    height: 16,
+                  ),
             TextField(
               style: Theme.of(context).textTheme.bodyMedium,
               keyboardType: TextInputType.multiline,

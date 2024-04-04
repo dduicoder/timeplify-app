@@ -36,14 +36,19 @@ class CalendarList extends StatelessWidget {
     showDialog(
       context: ctx,
       builder: (BuildContext context) {
-        final List<String> timeD =
-            timeDifferenceInHours(calendar.start, calendar.end);
+        final isTime = calendar.start != "";
+        late List<String> timeD = [];
+        if (isTime) {
+          timeD = timeDifferenceInHours(calendar.start, calendar.end);
+        }
         return AlertDialog(
           insetPadding: const EdgeInsets.all(24),
           surfaceTintColor: Colors.white,
           backgroundColor: Colors.white,
           title: Text(
-            "${calendar.title} (${timeD[0]}${timeD[1]})",
+            isTime
+                ? "${calendar.title} (${timeD[0]}${timeD[1]})"
+                : calendar.title,
             style: Theme.of(ctx).textTheme.bodyLarge,
           ),
           content: Text(calendar.description),
@@ -105,12 +110,14 @@ class CalendarList extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            trailing: Text(
-              "${item.start} ~ ${item.end}",
-              style: const TextStyle(
-                fontSize: 12,
-              ),
-            ),
+            trailing: item.start != ""
+                ? Text(
+                    "${item.start} ~ ${item.end}",
+                    style: const TextStyle(
+                      fontSize: 12,
+                    ),
+                  )
+                : const SizedBox.shrink(),
             subtitle: Text(
               item.description,
               style: const TextStyle(

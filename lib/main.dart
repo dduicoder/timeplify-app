@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
               elevation: 0,
               foregroundColor: Colors.white,
               backgroundColor: const Color.fromARGB(255, 100, 115, 230),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
           ),
           textTheme: const TextTheme(

@@ -52,7 +52,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _addCalendar(BuildContext ctx, Calendar calendar) {
-    // doesn't work
     GraphQLProvider.of(ctx).value.mutate(
           MutationOptions(
             document: gql(Queries.addCalendar),

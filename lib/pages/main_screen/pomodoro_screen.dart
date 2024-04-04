@@ -146,7 +146,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
                       Text(
                         format(_totalSeconds),
                         style: const TextStyle(
-                          fontSize: 48,
+                          fontSize: 40,
                           letterSpacing: -2,
                           fontWeight: FontWeight.bold,
                         ),
