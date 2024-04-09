@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           textButtonTheme: TextButtonThemeData(
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(

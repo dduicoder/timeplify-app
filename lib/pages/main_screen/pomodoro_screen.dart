@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:timeplifey/widget/pomodoro_form.dart';
+
 class PomodoroScreen extends StatefulWidget {
   static const routeName = "/pomodoro";
   const PomodoroScreen({super.key});
@@ -17,6 +19,25 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   late Timer _timer;
 
   late double _opacity = 0.5;
+
+  void _openCalendarModal(BuildContext ctx) {
+    showModalBottomSheet(
+      context: ctx,
+      builder: (_) {
+        return GestureDetector(
+          onTap: () {},
+          behavior: HitTestBehavior.opaque,
+          child: PomodoroForm(onSubmit: _onChangeTime),
+        );
+      },
+    );
+  }
+
+  void _onChangeTime(time) {
+    setState(() {
+      _totalSeconds = int.parse(time) * 60;
+    });
+  }
 
   void _onTick(Timer timer) {
     setState(() {
@@ -117,9 +138,22 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
             children: [
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  "Pomodoro",
-                  style: Theme.of(context).textTheme.bodyLarge,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Pomodoro",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _openCalendarModal(context);
+                      },
+                      child: const Text(
+                        "Set Time",
+                      ),
+                    )
+                  ],
                 ),
               ),
               const SizedBox(

@@ -61,7 +61,7 @@ class CalendarList extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {},
-              child: const Text("Pomodoro"),
+              child: const Text("Edit"),
             ),
           ],
         );
