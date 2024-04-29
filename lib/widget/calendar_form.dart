@@ -20,11 +20,13 @@ bool isTime1BeforeTime2(String time1, String time2) {
 
 class CalendarForm extends StatefulWidget {
   final Function(Calendar) onSubmit;
+  final Calendar initCalendar;
   final DateTime currentDate;
 
   const CalendarForm({
     super.key,
     required this.onSubmit,
+    required this.initCalendar,
     required this.currentDate,
   });
 
@@ -68,7 +70,9 @@ class _CalendarFormState extends State<CalendarForm> {
         description.isNotEmpty) {
       widget.onSubmit(
         Calendar(
-          id: const Uuid().v4(),
+          id: widget.initCalendar.id == ""
+              ? const Uuid().v4()
+              : widget.initCalendar.id,
           title: title,
           start: _start,
           end: _end,
@@ -80,7 +84,9 @@ class _CalendarFormState extends State<CalendarForm> {
     } else if (!_isDate && title.isNotEmpty && description.isNotEmpty) {
       widget.onSubmit(
         Calendar(
-          id: const Uuid().v4(),
+          id: widget.initCalendar.id == ""
+              ? const Uuid().v4()
+              : widget.initCalendar.id,
           title: title,
           start: "",
           end: "",
@@ -140,7 +146,7 @@ class _CalendarFormState extends State<CalendarForm> {
                 labelStyle: Theme.of(context).textTheme.bodyMedium,
               ),
               onSubmitted: (_) => _submitForm(),
-              controller: _titleController,
+              controller: _titleController..text = widget.initCalendar.title,
             ),
             const SizedBox(height: 32),
             Row(
@@ -198,7 +204,8 @@ class _CalendarFormState extends State<CalendarForm> {
                 labelStyle: Theme.of(context).textTheme.bodyMedium,
               ),
               onSubmitted: (_) => _submitForm(),
-              controller: _descriptionController,
+              controller: _descriptionController
+                ..text = widget.initCalendar.description,
             ),
             const SizedBox(height: 32),
             Row(

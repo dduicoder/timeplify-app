@@ -57,7 +57,7 @@ class _TabsScreenState extends State<TabsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Timeplifey"),
+        title: const Text("Timeplify"),
         actions: _appBarPages
             .map(
               (e) => IconButton(

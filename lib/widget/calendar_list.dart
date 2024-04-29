@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timeplifey/models/calendar.dart';
+import 'package:timeplifey/widget/calendar_form.dart';
 
 List<String> timeDifferenceInHours(String startTime, String endTime) {
   List<int> startComponents = startTime.split(':').map(int.parse).toList();
@@ -21,12 +22,16 @@ List<String> timeDifferenceInHours(String startTime, String endTime) {
 
 class CalendarList extends StatelessWidget {
   final List<Calendar> calendars;
+  final DateTime currentDate;
   final Function(BuildContext, String) onRemoveCalendar;
+  final Function(BuildContext, Calendar) onUpdateCalendar;
 
   const CalendarList({
     super.key,
     required this.calendars,
+    required this.currentDate,
     required this.onRemoveCalendar,
+    required this.onUpdateCalendar,
   });
 
   void _showDescription(
@@ -60,7 +65,26 @@ class CalendarList extends StatelessWidget {
               child: const Text("Close"),
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pop();
+                showModalBottomSheet(
+                  context: ctx,
+                  builder: (_) {
+                    return GestureDetector(
+                      onTap: () {},
+                      behavior: HitTestBehavior.opaque,
+                      child: CalendarForm(
+                        currentDate: currentDate,
+                        initCalendar: calendar,
+                        onSubmit: (calendar) {
+                          onUpdateCalendar(
+                              ctx, calendar); // WTF the context is wrong
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
               child: const Text("Edit"),
             ),
           ],

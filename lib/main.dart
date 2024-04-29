@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       child: MaterialApp(
-        title: 'Timeplifey',
+        title: 'Timeplify',
         theme: ThemeData(
           fontFamily: "Sanfrancisco",
           brightness: Brightness.light,

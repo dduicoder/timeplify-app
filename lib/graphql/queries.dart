@@ -32,4 +32,9 @@ class Queries {
     removeCalendar(date: \$date, id: \$calendarId)
   }
   """;
+  static String updateCalendar = """
+  mutation UpdateCalendar(\$date: String!, \$calendarId: ID!, \$title: String!, \$start: String!, \$end: String!, \$description: String!) {
+    updateCalendar(date: \$date, id: \$calendarId, title: \$title, start: \$start, end: \$end, description: \$description)
+  }
+  """;
 }

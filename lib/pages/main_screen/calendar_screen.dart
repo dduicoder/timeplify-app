@@ -42,6 +42,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
           behavior: HitTestBehavior.opaque,
           child: CalendarForm(
             currentDate: _focusedDay,
+            initCalendar: Calendar(
+              id: "",
+              title: "",
+              start: "",
+              end: "",
+              description: "",
+            ),
             onSubmit: (calendar) {
               _addCalendar(ctx, calendar);
             },
@@ -78,6 +85,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
             variables: {
               "date": DateFormat("yyyy-MM-dd").format(_focusedDay),
               "calendarId": id,
+            },
+            onCompleted: (result) {
+              refetchAll();
+              refetchDate();
+            },
+          ),
+        );
+  }
+
+  void _updateCalendar(BuildContext ctx, Calendar calendar) {
+    GraphQLProvider.of(ctx).value.mutate(
+          MutationOptions(
+            document: gql(Queries.updateCalendar),
+            variables: {
+              "date": DateFormat("yyyy-MM-dd").format(_focusedDay),
+              "calendarId": calendar.id,
+              "title": calendar.title,
+              "start": calendar.start,
+              "end": calendar.end,
+              "description": calendar.description,
             },
             onCompleted: (result) {
               refetchAll();
@@ -232,7 +259,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ? const Center(child: Text("- No Calendars -"))
                       : CalendarList(
                           calendars: calendars,
+                          currentDate: _focusedDay,
                           onRemoveCalendar: _removeCalendar,
+                          onUpdateCalendar: _updateCalendar,
                         ),
                 );
               },
